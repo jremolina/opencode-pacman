@@ -22,6 +22,7 @@ New files must be added to `index.html` in dependency order and expose what they
 Key invariants:
 - `MAZE` is pristine and never mutated. `createGame()` deep-copies rows into `game.grid`; render and collision logic must read `game.grid` so eaten dots disappear and restart works.
 - Maze chars: `#`=wall(1), `.`=dot(2), space=empty(0), `-`=pen door(3). Pac-Man is blocked by 1 and 3; ghosts only by 1.
+- Ghosts: `GHOST_STARTS` declares four `kind`s — `chaser` reaches Pac-Man via BFS shortest path, `ambusher` targets 4 cells ahead of him, `wanderer` turns at random, `coward` patrols `{ x: 25, y: 29 }` and flees when Pac-Man is ≤ 8 cells away (Manhattan); each releases from the pen at its `releaseFrame` (0/90/180/270 frames).
 - `render.js` and `game.js` both depend on `TILE`/maze geometry implicitly; don't change one without checking the other.
 
 ## Non-obvious gotchas
