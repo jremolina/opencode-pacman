@@ -206,7 +206,21 @@ function decideGhost( game, g ) {
     return;
   }
 
-  const target = targetFor( game, g );
+  let target = targetFor( game, g );
+  let mode = 'min';
+
+  // Cobarde: si Pac-Man esta a 8 celdas o menos huye de el (maximiza la
+  // distancia Manhattan); si no, patrulla la esquina inferior derecha.
+  if ( g.kind === 'coward' ) {
+    const p = game.pacman;
+    const px = Math.round( p.x );
+    const py = Math.round( p.y );
+    const dist = Math.abs( g.x - px ) + Math.abs( g.y - py );
+    if ( dist <= 8 ) {
+      target = { x: px, y: py };
+      mode = 'max';
+    }
+  }
 
   // El perseguidor va por el camino mas corto; sin camino, greedy.
   if ( g.kind === 'chaser' ) {
@@ -217,7 +231,7 @@ function decideGhost( game, g ) {
     }
   }
 
-  g.dir = bestDir( g, choices, target, 'min' );
+  g.dir = bestDir( g, choices, target, mode );
 }
 
 function moveGhost( game, g ) {
