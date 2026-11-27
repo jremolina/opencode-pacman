@@ -27,6 +27,7 @@ function createGame() {
     state: 'start',
     score: 0,
     lives: 3,
+    tick: 0,
     dotsRemaining: dots,
     grid,
     pacman: {
@@ -45,6 +46,7 @@ function createGame() {
       name: g.name,
       color: g.color,
       releaseFrame: g.releaseFrame,
+      inPen: true, // true hasta cruzar la puerta (fila 11)
     } ) ),
   };
 }
@@ -148,6 +150,21 @@ function moveGhost( game, g ) {
   const grid = game.grid;
   const width = grid[ 0 ].length;
 
+  // Salida escalonada: dentro de la pen, recto hacia arriba hasta la fila 11.
+  if ( g.inPen ) {
+    if ( game.tick < g.releaseFrame ) return; // aun no le toca salir
+    if ( aligned( g.x ) && aligned( g.y ) ) {
+      g.x = Math.round( g.x );
+      g.y = Math.round( g.y );
+      g.dir = 'up';
+      if ( g.y <= 11 ) g.inPen = false; // cruzo la puerta
+    }
+    if ( g.inPen ) {
+      g.y -= g.speed;
+      return;
+    }
+  }
+
   if ( aligned( g.x ) && aligned( g.y ) ) {
     g.x = Math.round( g.x );
     g.y = Math.round( g.y );
@@ -171,7 +188,9 @@ function resetPositions( game ) {
     g.x = GHOST_STARTS[ i ].x;
     g.y = GHOST_STARTS[ i ].y;
     g.dir = 'up';
+    g.inPen = true;
   } );
+  game.tick = 0;
 }
 
 function collides( a, b ) {
@@ -179,6 +198,7 @@ function collides( a, b ) {
 }
 
 function update( game ) {
+  game.tick++; // solo avanza en 'playing': update no se llama en otros estados
   movePacman( game );
   game.ghosts.forEach( ( g ) => moveGhost( game, g ) );
 
