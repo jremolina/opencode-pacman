@@ -42,6 +42,9 @@ function createGame() {
       dir: 'up',
       speed: GHOST_SPEED,
       kind: g.kind,
+      name: g.name,
+      color: g.color,
+      releaseFrame: g.releaseFrame,
     } ) ),
   };
 }

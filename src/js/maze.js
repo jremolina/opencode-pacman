@@ -51,9 +51,12 @@ const MAZE = MAZE_STR.map( ( row ) => row.split( '' ).map( parseTile ) );
 
 const TUNNEL_ROW = 14;
 const PACMAN_START = { x: 13, y: 23 };
+// Registro unico de fantasmas: posicion de salida, personalidad y color.
 const GHOST_STARTS = [
-  { x: 13, y: 14, kind: 'hunter' }, // dentro de la pen
-  { x: 14, y: 14, kind: 'random' }, // dentro de la pen
+  { x: 13, y: 14, kind: 'chaser',   name: 'Rojo',    color: '#ff0000', releaseFrame: 0 },
+  { x: 14, y: 14, kind: 'ambusher', name: 'Rosa',    color: '#ffb8ff', releaseFrame: 90 },
+  { x: 13, y: 15, kind: 'wanderer', name: 'Cian',    color: '#00ffff', releaseFrame: 180 },
+  { x: 14, y: 15, kind: 'coward',   name: 'Naranja', color: '#ffb852', releaseFrame: 270 },
 ];
 
 window.MAZE = MAZE;
