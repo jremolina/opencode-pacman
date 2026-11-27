@@ -156,6 +156,42 @@ function bestDir( g, options, target, mode ) {
   return best;
 }
 
+// Primer paso del camino mas corto (BFS) de 'from' a 'to', en celdas enteras.
+// Vecinos en orden fijo (up, left, down, right) para un desempate determinista;
+// pasabilidad de fantasma y salto por el tunel en TUNNEL_ROW, igual que canMove.
+// Devuelve la direccion o null si no hay camino (el caller cae al greedy).
+function bfsNextDir( grid, from, to ) {
+  const W = grid[ 0 ].length;
+  const H = grid.length;
+  const DIR_ORDER = [ 'up', 'left', 'down', 'right' ];
+
+  const startKey = from.y * W + from.x;
+  const targetKey = to.y * W + to.x;
+  const seen = new Set( [ startKey ] );
+  const queue = [ { x: from.x, y: from.y, first: null } ];
+  let head = 0;
+
+  while ( head < queue.length ) {
+    const cur = queue[ head++ ];
+    if ( cur.y * W + cur.x === targetKey ) return cur.first;
+
+    for ( const dir of DIR_ORDER ) {
+      const d = DIRS[ dir ];
+      let nx = cur.x + d.x;
+      let ny = cur.y + d.y;
+      // Tunel: salir por un borde en la fila del tunel envuelve al otro lado.
+      if ( ny === TUNNEL_ROW && ( nx < 0 || nx >= W ) ) nx = ( nx + W ) % W;
+      if ( nx < 0 || nx >= W || ny < 0 || ny >= H ) continue;
+      if ( isWall( grid, nx, ny, 'ghost' ) ) continue;
+      const k = ny * W + nx;
+      if ( seen.has( k ) ) continue;
+      seen.add( k );
+      queue.push( { x: nx, y: ny, first: cur.first === null ? dir : cur.first } );
+    }
+  }
+  return null; // sin camino
+}
+
 function decideGhost( game, g ) {
   const grid = game.grid;
 
@@ -171,6 +207,16 @@ function decideGhost( game, g ) {
   }
 
   const target = targetFor( game, g );
+
+  // El perseguidor va por el camino mas corto; sin camino, greedy.
+  if ( g.kind === 'chaser' ) {
+    const step = bfsNextDir( grid, g, target );
+    if ( step ) {
+      g.dir = step;
+      return;
+    }
+  }
+
   g.dir = bestDir( g, choices, target, 'min' );
 }
 
